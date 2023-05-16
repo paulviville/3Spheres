@@ -59,13 +59,15 @@ const radiusP = Math.sqrt(radius0*radius0 - c0.distanceTo(p) * c0.distanceTo(p))
 const pointT0 = p.clone().addScaledVector(n, radiusP);
 
 const tangent = pointT0.clone().sub(c0).normalize();
-
+const tangentDown = tangent.clone().reflect(n)
 
 
 
 const pointT1 = c1.clone().addScaledVector(tangent, radius1)
 const pointT2 = c2.clone().addScaledVector(tangent, radius2)
-
+const pointT0D = c0.clone().addScaledVector(tangentDown, radius0)
+const pointT1D = c1.clone().addScaledVector(tangentDown, radius1)
+const pointT2D = c2.clone().addScaledVector(tangentDown, radius2)
 const radiusP1 = Math.sqrt(radius0*radius0 - c0.distanceTo(p1) * c0.distanceTo(p1))
 const radiusP2 = Math.sqrt(radius0*radius0 - c0.distanceTo(p2) * c0.distanceTo(p2))
 
@@ -154,6 +156,8 @@ scene.add(sphereT2)
 
 const arrowT0 = new THREE.ArrowHelper(tangent, c0, radius0, 0x008800);
 scene.add(arrowT0)
+const arrowT00 = new THREE.ArrowHelper(tangentDown, c0, radius0, 0x008800);
+scene.add(arrowT00)
 const arrowT1 = new THREE.ArrowHelper(tangent, c1, radius1, 0x008800);
 scene.add(arrowT1)
 const arrowT2 = new THREE.ArrowHelper(tangent, c2, radius2, 0x008800);
@@ -166,9 +170,13 @@ const tangentGeo = new THREE.Geometry();
 tangentGeo.vertices.push(pointT0.clone());
 tangentGeo.vertices.push(pointT1.clone());
 tangentGeo.vertices.push(pointT2.clone());
-
+tangentGeo.vertices.push(pointT0D.clone());
+tangentGeo.vertices.push(pointT1D.clone());
+tangentGeo.vertices.push(pointT2D.clone());
 let ft = new THREE.Face3(0,1,2);
+let ft2 = new THREE.Face3(3,4,5);
 tangentGeo.faces.push(ft);
+tangentGeo.faces.push(ft2);
 tangentGeo.computeFaceNormals();
 let tangentMat = new THREE.MeshLambertMaterial({color: 0x000000, side: THREE.DoubleSide, wireframe: true});
 let tangenttriangle = new THREE.Mesh(tangentGeo, tangentMat);
