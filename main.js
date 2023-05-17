@@ -26,7 +26,7 @@ const orbit_controls = new OrbitControls(camera, renderer.domElement)
 
 const radius0 = 0.5;
 const radius1 = 0.15;
-const radius2 = 0.35;
+const radius2 = 0.25;
 
 const c0 = new THREE.Vector3(0.5, 0.5, -0.3);
 const c1 = new THREE.Vector3(-0.35, 0.7, 0.3);
@@ -166,48 +166,46 @@ scene.add(arrowT2)
 
 
 
-const tangentGeo = new THREE.Geometry();
-tangentGeo.vertices.push(pointT0.clone());
-tangentGeo.vertices.push(pointT1.clone());
-tangentGeo.vertices.push(pointT2.clone());
-tangentGeo.vertices.push(pointT0D.clone());
-tangentGeo.vertices.push(pointT1D.clone());
-tangentGeo.vertices.push(pointT2D.clone());
-let ft = new THREE.Face3(0,1,2);
-let ft2 = new THREE.Face3(3,4,5);
-tangentGeo.faces.push(ft);
-tangentGeo.faces.push(ft2);
-tangentGeo.computeFaceNormals();
+// const tangentGeo = new THREE.Geometry();
+// tangentGeo.vertices.push(pointT0.clone());
+// tangentGeo.vertices.push(pointT1.clone());
+// tangentGeo.vertices.push(pointT2.clone());
+// tangentGeo.vertices.push(pointT0D.clone());
+// tangentGeo.vertices.push(pointT1D.clone());
+// tangentGeo.vertices.push(pointT2D.clone());
+// let ft = new THREE.Face3(0,1,2);
+// let ft2 = new THREE.Face3(3,4,5);
+// tangentGeo.faces.push(ft);
+// tangentGeo.faces.push(ft2);
+// tangentGeo.computeFaceNormals();
 let tangentMat = new THREE.MeshLambertMaterial({color: 0x000000, side: THREE.DoubleSide, wireframe: true});
-let tangenttriangle = new THREE.Mesh(tangentGeo, tangentMat);
-scene.add(tangenttriangle)
+// let tangenttriangle = new THREE.Mesh(tangentGeo, tangentMat);
+// scene.add(tangenttriangle)
 
 
-const planeGeo = new THREE.PlaneGeometry(10, 10);
-const planeMat = new THREE.MeshLambertMaterial({color: 0xffffff, side: THREE.DoubleSide});
-const plane = new THREE.Mesh(planeGeo, planeMat);
-plane.lookAt(tangent)
-plane.position.copy(pointT1)
-// scene.add(plane)
+// const planeGeo = new THREE.PlaneGeometry(10, 10);
+// const planeMat = new THREE.MeshLambertMaterial({color: 0xffffff, side: THREE.DoubleSide});
+// const plane = new THREE.Mesh(planeGeo, planeMat);
+// plane.lookAt(tangent)
+// plane.position.copy(pointT1)
+// // scene.add(plane)
 
-const circle1Geo = new THREE.CircleGeometry(radiusP1, 32)
-const circle1 = new THREE.Mesh(circle1Geo, tangentMat);
-circle1.lookAt(n1);
-circle1.position.copy(p1)
-scene.add(circle1);
+const circle1Geo = new THREE.CircleGeometry(radiusP1, 128)
+const circle2Geo = new THREE.CircleGeometry(radiusP2, 128)
 
-const circle2Geo = new THREE.CircleGeometry(radiusP2, 32)
-const circle2 = new THREE.Mesh(circle2Geo, tangentMat);
-circle2.lookAt(n2);
-circle2.position.copy(p2)
-scene.add(circle2);
+const circleMat = new THREE.LineBasicMaterial({	color: 0x000000});
+// for(let i = 1; i < circle1Geo.)
+const Lcircle1Geo = new THREE.BufferGeometry().setFromPoints(circle1Geo.vertices.slice(1))
+const circle1Line = new THREE.LineLoop(Lcircle1Geo, circleMat);
+scene.add(circle1Line)
+circle1Line.lookAt(n1);
+circle1Line.position.copy(p1)
 
-
-const tan1 = pointT1.clone().sub(pointT0);
-const tan2 = pointT2.clone().sub(pointT0);
-
-console.log(tan2.dot(tangent), tan1.dot(tangent))
-
+const Lcircle2Geo = new THREE.BufferGeometry().setFromPoints(circle2Geo.vertices.slice(1))
+const circle2Line = new THREE.LineLoop(Lcircle2Geo, circleMat);
+scene.add(circle2Line)
+circle2Line.lookAt(n2);
+circle2Line.position.copy(p2)
 
 function update(t)
 {
