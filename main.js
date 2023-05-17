@@ -19,11 +19,6 @@ scene.add(pointLight0);
 const orbit_controls = new OrbitControls(camera, renderer.domElement)
 
 
-
-
-
-
-
 const radius0 = 0.5;
 const radius1 = 0.15;
 const radius2 = 0.25;
@@ -32,33 +27,43 @@ const c0 = new THREE.Vector3(0.5, 0.5, -0.3);
 const c1 = new THREE.Vector3(-0.35, 0.7, 0.3);
 const c2 = new THREE.Vector3(-0.27, -0.3, -0.47);
 
-
+/// vector from sphere 0 to sphere 1
 const d1 = c1.clone().sub(c0);
+const ld1 = d1.length();
+
+/// vector from sphere 0 to sphere 2
 const d2 = c2.clone().sub(c0);
-const n1 = d1.clone().normalize();
-const n2 = d2.clone().normalize();
-const n = n1.clone().cross(n2).normalize();
+const ld2 = d2.length();
 
-const thales1 = d1.length() *(radius1 / (radius0 - radius1) + 1);
-const cosAlpha = radius0 / (thales1);
-const p1 = c0.clone().addScaledVector(n1, radius0*cosAlpha);
+// normalizing the vectors 
+d1.multiplyScalar(1 / ld1);
+d2.multiplyScalar(1 / ld2);
 
-const thales2 = d2.length()*(radius2 / (radius0 - radius2) + 1);
-const cosBeta = radius0 / (thales2);
-const p2 = c0.clone().addScaledVector(n2, radius0*cosBeta);
+//computing n normal to triangle (c0, c1, c2)
+const n = d1.clone().cross(d2).normalize();
 
-const q1 = n.clone().cross(n1);
-const q2 = n2.clone().cross(n);
+// computing the centers of the tangent circles of medial cones (c0,c1) and (c0,c2) using thales
+const p1 = c0.clone().addScaledVector(d1, radius0*radius0 / (ld1 *(radius1 / (radius0 - radius1) + 1)));
+const p2 = c0.clone().addScaledVector(d2, radius0*radius0 / (ld2*(radius2 / (radius0 - radius2) + 1)));
 
-const originDiff = p2.clone().sub(p1);
-const t = (originDiff.x * q2.y - originDiff.y * q2.x) / (q1.x * q2.y - q1.y * q2.x);
+// computing radius vectors of the tangent circles, in the plane of the triangle (c0, c1, c2)
+const q1 = n.clone().cross(d1);
+const q2 = d2.clone().cross(n);
+
+// computing the intersection of the radius vectors
+const t = ((p2.x - p1.x)* q2.y - (p2.y - p1.y) * q2.x) / (q1.x * q2.y - q1.y * q2.x);
 const p = p1.clone().addScaledVector(q1, t);
 
+// p is the projection of the intersection of the circles in the triangle (c0, c1, c2)
+// computing the distance to the surface of the sphere along normal to the triangle using pythagor 
 const radiusP = Math.sqrt(radius0*radius0 - c0.distanceTo(p) * c0.distanceTo(p))
-
+// projecting p on the sphere along n
 const pointT0 = p.clone().addScaledVector(n, radiusP);
 
+// normal of the tangent plane is the vector from c0 to that point
 const tangent = pointT0.clone().sub(c0).normalize();
+
+// the second tangent plane is the reflection of the first one along the plane of the triangle
 const tangentDown = tangent.clone().reflect(n)
 
 
@@ -121,11 +126,11 @@ scene.add(sphereP2)
 
 
 const arrowN = new THREE.ArrowHelper(n, c0, 1, 0xff0000);
-const arrowN1 = new THREE.ArrowHelper(n1, c0, 1, 0x00ff00);
-const arrowN2 = new THREE.ArrowHelper(n2, c0, 1, 0x0000ff);
+const arrowN1 = new THREE.ArrowHelper(d1, c0, 1, 0x00ff00);
+const arrowd2 = new THREE.ArrowHelper(d2, c0, 1, 0x0000ff);
 scene.add(arrowN);
 scene.add(arrowN1);
-scene.add(arrowN2);
+scene.add(arrowd2);
 
 
 
@@ -166,29 +171,22 @@ scene.add(arrowT2)
 
 
 
-// const tangentGeo = new THREE.Geometry();
-// tangentGeo.vertices.push(pointT0.clone());
-// tangentGeo.vertices.push(pointT1.clone());
-// tangentGeo.vertices.push(pointT2.clone());
-// tangentGeo.vertices.push(pointT0D.clone());
-// tangentGeo.vertices.push(pointT1D.clone());
-// tangentGeo.vertices.push(pointT2D.clone());
-// let ft = new THREE.Face3(0,1,2);
-// let ft2 = new THREE.Face3(3,4,5);
-// tangentGeo.faces.push(ft);
-// tangentGeo.faces.push(ft2);
-// tangentGeo.computeFaceNormals();
+const tangentGeo = new THREE.Geometry();
+tangentGeo.vertices.push(pointT0.clone());
+tangentGeo.vertices.push(pointT1.clone());
+tangentGeo.vertices.push(pointT2.clone());
+tangentGeo.vertices.push(pointT0D.clone());
+tangentGeo.vertices.push(pointT1D.clone());
+tangentGeo.vertices.push(pointT2D.clone());
+let ft = new THREE.Face3(0,1,2);
+let ft2 = new THREE.Face3(3,4,5);
+tangentGeo.faces.push(ft);
+tangentGeo.faces.push(ft2);
+tangentGeo.computeFaceNormals();
 let tangentMat = new THREE.MeshLambertMaterial({color: 0x000000, side: THREE.DoubleSide, wireframe: true});
-// let tangenttriangle = new THREE.Mesh(tangentGeo, tangentMat);
-// scene.add(tangenttriangle)
+let tangenttriangle = new THREE.Mesh(tangentGeo, tangentMat);
+scene.add(tangenttriangle)
 
-
-// const planeGeo = new THREE.PlaneGeometry(10, 10);
-// const planeMat = new THREE.MeshLambertMaterial({color: 0xffffff, side: THREE.DoubleSide});
-// const plane = new THREE.Mesh(planeGeo, planeMat);
-// plane.lookAt(tangent)
-// plane.position.copy(pointT1)
-// // scene.add(plane)
 
 const circle1Geo = new THREE.CircleGeometry(radiusP1, 128)
 const circle2Geo = new THREE.CircleGeometry(radiusP2, 128)
@@ -198,13 +196,13 @@ const circleMat = new THREE.LineBasicMaterial({	color: 0x000000});
 const Lcircle1Geo = new THREE.BufferGeometry().setFromPoints(circle1Geo.vertices.slice(1))
 const circle1Line = new THREE.LineLoop(Lcircle1Geo, circleMat);
 scene.add(circle1Line)
-circle1Line.lookAt(n1);
+circle1Line.lookAt(d1);
 circle1Line.position.copy(p1)
 
 const Lcircle2Geo = new THREE.BufferGeometry().setFromPoints(circle2Geo.vertices.slice(1))
 const circle2Line = new THREE.LineLoop(Lcircle2Geo, circleMat);
 scene.add(circle2Line)
-circle2Line.lookAt(n2);
+circle2Line.lookAt(d2);
 circle2Line.position.copy(p2)
 
 function update(t)
